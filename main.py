@@ -9,8 +9,13 @@ PNG_B64 = "iVBORw0KGgoAAAANSUhEUgAABAAAAAMACAIAAAA12IJaAABe8ElEQVR4nO3df6hm5YEn+
 def main():
     outdir = os.environ.get("MAKEFUN_OUTPUT_DIR", "/output")
     os.makedirs(outdir, exist_ok=True)
-    with open(os.path.join(outdir, "entry.png"), "wb") as f:
-        f.write(base64.b64decode(PNG_B64))
+    data = base64.b64decode(PNG_B64)
+    if not data.startswith(b"\x89PNG\r\n\x1a\n"):
+        raise SystemExit("decoded data is not a valid PNG")
+    tmp_path = os.path.join(outdir, ".entry.png.tmp")
+    with open(tmp_path, "wb") as f:
+        f.write(data)
+    os.replace(tmp_path, os.path.join(outdir, "entry.png"))
 
 if __name__ == "__main__":
     main()
